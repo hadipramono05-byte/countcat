@@ -1,6 +1,6 @@
 class Rupiah {
   static int? parse(String input) {
-    final normalized = input.trim().replaceAll(RegExp(r'(?i)rp'), '').replaceAll('.', '').replaceAll(',', '');
+    final normalized = input.trim().replaceAll(RegExp('rp', caseSensitive: false), '').replaceAll('.', '').replaceAll(',', '');
     if (!RegExp(r'^\d+$').hasMatch(normalized)) return null;
     return int.tryParse(normalized);
   }

@@ -1,4 +1,4 @@
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite/sqflite.dart' show DatabaseException;
 
 import '../database/app_database.dart';
 import '../models/transaction.dart';

@@ -1,9 +1,9 @@
 import '../../data/models/statuses.dart';
 
 class TransactionValidator {
-  static String? productCode(String value) => value.trim().isEmpty ? 'Kode Barang wajib diisi.' : null;
-  static String? orderId(String value) => value.trim().isEmpty ? 'ID Pesanan wajib diisi.' : null;
-  static String? quantity(String value) {
+  static String? productCode(String? value) => value == null || value.trim().isEmpty ? 'Kode Barang wajib diisi.' : null;
+  static String? orderId(String? value) => value == null || value.trim().isEmpty ? 'ID Pesanan wajib diisi.' : null;
+  static String? quantity(String? value) {
     final amount = int.tryParse(value);
     return amount == null || amount < 1 ? 'Qty harus berupa angka minimal 1.' : null;
   }
