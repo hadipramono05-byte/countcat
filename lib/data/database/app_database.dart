@@ -3,23 +3,33 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as ffi;
 
-/// Owns the versioned local SQLite schema shared by Android and Windows.
 class AppDatabase {
-  AppDatabase._();
+  AppDatabase._({sqflite.DatabaseFactory? databaseFactory, String? databasePath})
+      : _databaseFactory = databaseFactory,
+        _databasePath = databasePath;
 
   static final AppDatabase instance = AppDatabase._();
   static const _databaseName = 'tiktok_seller.db';
   static const _schemaVersion = 1;
 
   sqflite.Database? _database;
+  final sqflite.DatabaseFactory? _databaseFactory;
+  final String? _databasePath;
+
+  factory AppDatabase.inMemoryForTesting() {
+    ffi.sqfliteFfiInit();
+    return AppDatabase._(
+      databaseFactory: ffi.databaseFactoryFfi,
+      databasePath: ffi.inMemoryDatabasePath,
+    );
+  }
 
   Future<sqflite.Database> get database async {
     final existingDatabase = _database;
     if (existingDatabase != null) return existingDatabase;
 
-    final factory = _databaseFactoryForCurrentPlatform();
-    final databasesPath = await factory.getDatabasesPath();
-    final databasePath = '$databasesPath${Platform.pathSeparator}$_databaseName';
+    final factory = _databaseFactory ?? _databaseFactoryForCurrentPlatform();
+    final databasePath = _databasePath ?? await _defaultDatabasePath(factory);
     final openedDatabase = await factory.openDatabase(
       databasePath,
       options: sqflite.OpenDatabaseOptions(
@@ -29,6 +39,17 @@ class AppDatabase {
     );
     _database = openedDatabase;
     return openedDatabase;
+  }
+
+  Future<void> close() async {
+    final database = _database;
+    _database = null;
+    await database?.close();
+  }
+
+  Future<String> _defaultDatabasePath(sqflite.DatabaseFactory factory) async {
+    final databasesPath = await factory.getDatabasesPath();
+    return '$databasesPath${Platform.pathSeparator}$_databaseName';
   }
 
   sqflite.DatabaseFactory _databaseFactoryForCurrentPlatform() {

@@ -9,9 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # SQLite API on Android, backed by the platform SQLite implementation.
   sqflite: ^2.4.0
-  # Supplies the SQLite FFI database factory required for Windows desktop.
   sqflite_common_ffi: ^2.3.4
 
 dev_dependencies:
