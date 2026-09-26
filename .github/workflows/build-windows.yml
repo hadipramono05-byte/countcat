@@ -15,6 +15,7 @@ jobs:
           channel: stable
 
       - run: flutter create --platforms=windows .
+      - run: if (Test-Path test/widget_test.dart) { Remove-Item test/widget_test.dart }
 
       - run: flutter pub get
 
