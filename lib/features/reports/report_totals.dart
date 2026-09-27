@@ -14,9 +14,9 @@ class ReportTotals {
     var hpp = 0;
     var profit = 0;
     for (final transaction in transactions) {
+      gmv += transaction.gmvAmount;
       if (transaction.paymentStatus == PaymentStatus.cancelled) continue;
       final transactionHpp = globalHpp * transaction.quantity;
-      gmv += transaction.gmvAmount;
       netIncome += transaction.netIncomeAmount;
       hpp += transactionHpp;
       profit += transaction.netIncomeAmount - transactionHpp;

@@ -24,7 +24,7 @@ class TransactionRepository {
     }
   }
 
-  Future<List<Transaction>> listTransactions({String search = '', int? liveSessionId, PaymentStatus? paymentStatus, OrderStatus? orderStatus}) async {
+  Future<List<Transaction>> listTransactions({String search = '', int? liveSessionId, PaymentStatus? paymentStatus, OrderStatus? orderStatus, DateTime? periodStart, DateTime? periodEnd}) async {
     final clauses = <String>[];
     final arguments = <Object?>[];
     final trimmedSearch = search.trim();
@@ -35,9 +35,16 @@ class TransactionRepository {
     if (liveSessionId != null) { clauses.add('live_session_id = ?'); arguments.add(liveSessionId); }
     if (paymentStatus != null) { clauses.add('payment_status = ?'); arguments.add(paymentStatus.value); }
     if (orderStatus != null) { clauses.add('order_status = ?'); arguments.add(orderStatus.value); }
+    if (periodStart != null) { clauses.add('created_at >= ?'); arguments.add(periodStart.toUtc().toIso8601String()); }
+    if (periodEnd != null) { clauses.add('created_at < ?'); arguments.add(periodEnd.toUtc().toIso8601String()); }
     final database = await _database.database;
     final rows = await database.query('transactions', where: clauses.isEmpty ? null : clauses.join(' AND '), whereArgs: arguments, orderBy: 'created_at DESC, id DESC');
     return rows.map(Transaction.fromMap).toList();
+  }
+
+  Future<void> deleteTransaction(int id) async {
+    final database = await _database.database;
+    await database.delete('transactions', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> updateTransaction(Transaction transaction) async {

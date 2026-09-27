@@ -10,7 +10,7 @@ class AppDatabase {
 
   static final AppDatabase instance = AppDatabase._();
   static const _databaseName = 'tiktok_seller.db';
-  static const _schemaVersion = 1;
+  static const _schemaVersion = 2;
 
   sqflite.Database? _database;
   final sqflite.DatabaseFactory? _databaseFactory;
@@ -35,6 +35,7 @@ class AppDatabase {
       options: sqflite.OpenDatabaseOptions(
         version: _schemaVersion,
         onCreate: _createSchema,
+        onUpgrade: _upgradeSchema,
       ),
     );
     _database = openedDatabase;
@@ -99,5 +100,25 @@ class AppDatabase {
     await database.execute('CREATE INDEX transactions_product_code_index ON transactions(product_code)');
     await database.execute('CREATE INDEX transactions_payment_status_index ON transactions(payment_status)');
     await database.execute('CREATE INDEX transactions_order_status_index ON transactions(order_status)');
+    await _createMonthlyReportsTable(database);
   }
+
+  Future<void> _upgradeSchema(sqflite.Database database, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) await _createMonthlyReportsTable(database);
+  }
+
+  Future<void> _createMonthlyReportsTable(sqflite.Database database) => database.execute('''
+    CREATE TABLE IF NOT EXISTS monthly_reports (
+      year INTEGER NOT NULL,
+      month INTEGER NOT NULL,
+      period_start TEXT NOT NULL,
+      period_end TEXT NOT NULL,
+      gmv_total INTEGER NOT NULL,
+      net_income_total INTEGER NOT NULL,
+      hpp_total INTEGER NOT NULL,
+      profit_total INTEGER NOT NULL,
+      submitted_at TEXT NOT NULL,
+      PRIMARY KEY (year, month)
+    )
+  ''');
 }
